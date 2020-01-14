@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\User as UserResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class Like extends JsonResource
@@ -21,7 +22,8 @@ class Like extends JsonResource
                 'attributes' => [
                     'likeable_type' => $this->likeable_type,
                     'likeable_id' => $this->likeable_id,
-                    'created_at' => $this->created_at->diffForHumans()
+                    'created_at' => $this->created_at->diffForHumans(),
+                    'liked_by' => new UserResource($this->user),
                 ]
             ],
         ];

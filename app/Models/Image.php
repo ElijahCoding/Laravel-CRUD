@@ -16,9 +16,26 @@ class Image extends Model
         static::addGlobalScope(new ReverseScope());
     }
 
-
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function likes()
+    {
+        return $this->morphMany(Likeable::class, 'likeable');
+    }
+
+    public function like()
+    {
+        $attributes = ['user_id' => auth()->id()];
+
+        if (!$this->likes()->where($attributes)->exists()) {
+            $this->likes()->create(
+                $attributes
+            );
+
+            return $this;
+        }
     }
 }
