@@ -61,7 +61,7 @@ class PostTest extends TestCase
     }
 
     /** @test */
-    public function an_authenticated_user_can_retrieve_posts()
+    public function an_authenticated_user_can_retrieve_his_own_posts()
     {
         $this->withoutExceptionHandling();
 
@@ -97,6 +97,33 @@ class PostTest extends TestCase
                 ],
                 'links' => [
                     'self' => url('/posts'),
+                ]
+            ]);
+    }
+
+    /** @test */
+    public function an_authenticated_user_can_retrieve_his_own_single_post()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->actingAs($user = factory(User::class)->create(), 'api');
+
+        $post = factory(Post::class)->create(['user_id' => $user->id]);
+
+        $response = $this->get('/api/posts/' . $post->id);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'data' => [
+                    'type' => 'posts',
+                    'post_id' => $post->id,
+                    'attributes' => [
+                        'body' => $post->body,
+                        'posted_at' => $post->created_at->diffForHumans()
+                    ]
+                ],
+                'links' => [
+                    'self' => url('/posts/' . $post->id),
                 ]
             ]);
     }
