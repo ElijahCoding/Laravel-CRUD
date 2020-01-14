@@ -63,17 +63,58 @@ class PostTest extends TestCase
     /** @test */
     public function a_body_is_required_to_create_a_post()
     {
-        $this->withoutExceptionHandling();
+//        $this->withoutExceptionHandling();
 
         $this->actingAs($user = factory(User::class)->create(), 'api');
 
         $post = factory(Post::class)->create();
 
-        $response = $this->json('POST','/api/posts/', [
+        $response = $this->post('/api/posts/', [
             'body' => ''
         ])->assertStatus(422);
 
         $responseString = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('body', $responseString['errors']);
+    }
+
+    /** @test */
+    public function an_authenticated_user_can_retrieve_posts()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->actingAs($user = factory(User::class)->create(), 'api');
+
+        $posts = factory(Post::class, 2)->create(['user_id' => $user->id]);
+
+        $response = $this->get('/api/posts');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'data' => [
+                    [
+                        'data' => [
+                            'type' => 'posts',
+                            'post_id' => $posts->last()->id,
+                            'attributes' => [
+                                'body' => $posts->last()->body,
+                                'posted_at' => $posts->last()->created_at->diffForHumans()
+                            ]
+                        ]
+                    ],
+                    [
+                        'data' => [
+                            'type' => 'posts',
+                            'post_id' => $posts->first()->id,
+                            'attributes' => [
+                                'body' => $posts->first()->body,
+                                'posted_at' => $posts->first()->created_at->diffForHumans()
+                            ]
+                        ]
+                    ]
+                ],
+                'links' => [
+                    'self' => url('/posts'),
+                ]
+            ]);
     }
 }
