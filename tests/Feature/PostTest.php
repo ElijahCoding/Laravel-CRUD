@@ -156,6 +156,15 @@ class PostTest extends TestCase
     /** @test */
     public function an_authenticated_user_can_delete_his_own_single_post()
     {
+        $this->withoutExceptionHandling();
 
+        $this->actingAs($user = factory(User::class)->create(), 'api');
+
+        $post = factory(Post::class)->create(['user_id' => $user->id]);
+
+        $response = $this->delete('/api/posts/' . $post->id);
+
+        $this->assertCount(0, Post::all());
+        $response->assertStatus(200);
     }
 }
