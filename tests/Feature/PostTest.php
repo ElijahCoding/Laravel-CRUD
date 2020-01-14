@@ -7,12 +7,12 @@ use App\Models\Post;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class CreatePostTest extends TestCase
+class PostTest extends TestCase
 {
     use RefreshDatabase;
 
     /** @test */
-    public function a_user_can_create_a_post()
+    public function an_authenticated_user_can_create_a_post()
     {
         $this->withoutExceptionHandling();
 
@@ -50,4 +50,30 @@ class CreatePostTest extends TestCase
             ]);
     }
 
+    /** @test */
+    public function an_unauthenticated_user_cannot_create_a_post()
+    {
+        $this->actingAs($user = factory(User::class)->create());
+
+        $response = $this->post('/api/posts', [
+            'body' => 'Testing Body'
+        ])->assertStatus(302);
+    }
+
+    /** @test */
+    public function a_body_is_required_to_create_a_post()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->actingAs($user = factory(User::class)->create(), 'api');
+
+        $post = factory(Post::class)->create();
+
+        $response = $this->json('POST','/api/posts/', [
+            'body' => ''
+        ])->assertStatus(422);
+
+        $responseString = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('body', $responseString['errors']);
+    }
 }
