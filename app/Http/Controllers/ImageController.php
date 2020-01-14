@@ -36,4 +36,30 @@ class ImageController extends Controller
 
         return new ImageResource($image);
     }
+
+    public function update(Image $image)
+    {
+        $this->authorize('touch', $image);
+
+        $data = request()->validate([
+            'body' => '',
+            'image' => 'required'
+        ]);
+
+        $image->update([
+            'body' => $data['body'],
+            'image' => $data['image']
+        ]);
+
+        return new ImageResource($image->fresh());
+    }
+
+    public function destroy(Image $image)
+    {
+        $this->authorize('touch', $image);
+
+        $image->delete();
+
+        return response([], 200);
+    }
 }

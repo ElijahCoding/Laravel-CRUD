@@ -62,6 +62,7 @@ class ImageTest extends TestCase
                             'image_id' => $images->last()->id,
                             'attributes' => [
                                 'body' => $images->last()->body,
+                                'image' => url($images->last()->image),
                                 'created_at' => $images->last()->created_at->diffForHumans()
                             ]
                         ]
@@ -72,6 +73,7 @@ class ImageTest extends TestCase
                             'image_id' => $images->first()->id,
                             'attributes' => [
                                 'body' => $images->first()->body,
+                                'image' => url($images->first()->image),
                                 'created_at' => $images->first()->created_at->diffForHumans()
                             ]
                         ]
@@ -101,6 +103,7 @@ class ImageTest extends TestCase
                     'image_id' => $image->id,
                     'attributes' => [
                         'body' => $image->body,
+                        'image' => url($image->image),
                         'created_at' => $image->created_at->diffForHumans()
                     ]
                 ],
@@ -108,5 +111,56 @@ class ImageTest extends TestCase
                     'self' => url('/images/' . $image->id),
                 ]
             ]);
+    }
+
+    /** @test */
+    public function an_authenticated_user_can_update_his_own_image()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->actingAs($user = factory(User::class)->create(), 'api');
+
+        $image = factory(Image::class)->create([
+            'user_id' => $user->id,
+        ]);
+
+        $response = $this->patch('/api/images/' . $image->id, [
+            'body' => 'updated body',
+            'image' => 'updated.image'
+        ]);
+
+        $image = $image->fresh();
+
+        $this->assertEquals($image->body, 'updated body');
+        $response->assertStatus(200)
+            ->assertJson([
+                'data' => [
+                    'type' => 'images',
+                    'image_id' => $image->id,
+                    'attributes' => [
+                        'body' => $image->body,
+                        'image' => url($image->image),
+                        'created_at' => $image->created_at->diffForHumans()
+                    ]
+                ],
+                'links' => [
+                    'self' => url('/images/' . $image->id),
+                ]
+            ]);
+    }
+
+    /** @test */
+    public function an_authenticated_user_can_delete_his_own_single_post()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->actingAs($user = factory(User::class)->create(), 'api');
+
+        $image = factory(Image::class)->create(['user_id' => $user->id]);
+
+        $response = $this->delete('/api/images/' . $image->id);
+
+        $this->assertCount(0, Image::all());
+        $response->assertStatus(200);
     }
 }
