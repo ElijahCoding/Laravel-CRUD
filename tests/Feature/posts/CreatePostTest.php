@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 class CreatePostTest extends TestCase
 {
     use RefreshDatabase;
-    
+
     /** @test */
     public function a_user_can_create_a_post()
     {
