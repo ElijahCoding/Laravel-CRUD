@@ -3,6 +3,7 @@
 Route::middleware('auth:api')->group(function () {
     Route::apiResources([
         '/posts' => 'PostController',
-        '/images' => 'ImageController'
+        '/images' => 'ImageController',
+        '/posts/{post}/like' => 'PostLikeController',
     ]);
 });
