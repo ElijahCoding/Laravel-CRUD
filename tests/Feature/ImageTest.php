@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\{Image, User}
+use App\Models\{Image, User};
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -27,8 +27,6 @@ class ImageTest extends TestCase
         $response = $this->post('/api/images', [
             'body' => 'Testing Body',
             'image' => $file,
-            'width' => 100,
-            'height' => 100,
         ]);
 
         Storage::disk('public')->assertExists('images/' . $file->hashName());
