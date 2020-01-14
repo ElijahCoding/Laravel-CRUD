@@ -3,9 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\Image as ImageResource;
+use App\Http\Resources\ImageCollection;
 
 class ImageController extends Controller
 {
+    public function index()
+    {
+        return new ImageCollection(request()->user()->images);
+    }
+
     public function store()
     {
         $data = request()->validate([

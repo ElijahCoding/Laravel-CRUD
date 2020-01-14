@@ -42,4 +42,44 @@ class ImageTest extends TestCase
             ]);
     }
 
+    /** @test */
+    public function a_user_can_retrieve_all_images()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->actingAs($user = factory(User::class)->create(), 'api');
+
+        $images = factory(Image::class, 2)->create(['user_id' => $user->id]);
+
+        $response = $this->get('/api/images');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'data' => [
+                    [
+                        'data' => [
+                            'type' => 'images',
+                            'image_id' => $images->last()->id,
+                            'attributes' => [
+                                'body' => $images->last()->body,
+                                'created_at' => $images->last()->created_at->diffForHumans()
+                            ]
+                        ]
+                    ],
+                    [
+                        'data' => [
+                            'type' => 'images',
+                            'image_id' => $images->first()->id,
+                            'attributes' => [
+                                'body' => $images->first()->body,
+                                'created_at' => $images->first()->created_at->diffForHumans()
+                            ]
+                        ]
+                    ]
+                ],
+                'links' => [
+                    'self' => url('/images'),
+                ]
+            ]);
+    }
 }
