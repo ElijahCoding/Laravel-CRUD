@@ -51,16 +51,6 @@ class PostTest extends TestCase
     }
 
     /** @test */
-    public function an_unauthenticated_user_cannot_create_a_post()
-    {
-        $this->actingAs($user = factory(User::class)->create());
-
-        $response = $this->post('/api/posts', [
-            'body' => 'Testing Body'
-        ])->assertStatus(302);
-    }
-
-    /** @test */
     public function an_authenticated_user_can_retrieve_his_own_posts()
     {
         $this->withoutExceptionHandling();
@@ -126,5 +116,46 @@ class PostTest extends TestCase
                     'self' => url('/posts/' . $post->id),
                 ]
             ]);
+    }
+
+    /** @test */
+    public function an_authenticated_user_can_update_his_own_post()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->actingAs($user = factory(User::class)->create(), 'api');
+
+        $post = factory(Post::class)->create([
+            'user_id' => $user->id,
+            'body' => 'testing body'
+        ]);
+
+        $response = $this->patch('/api/posts/' . $post->id, [
+            'body' => 'updated body'
+        ]);
+
+        $post = $post->fresh();
+
+        $this->assertEquals($post->body, 'updated body');
+        $response->assertStatus(200)
+            ->assertJson([
+                'data' => [
+                    'type' => 'posts',
+                    'post_id' => $post->id,
+                    'attributes' => [
+                        'body' => $post->body,
+                        'posted_at' => $post->created_at->diffForHumans()
+                    ]
+                ],
+                'links' => [
+                    'self' => url('/posts/' . $post->id),
+                ]
+            ]);
+    }
+
+    /** @test */
+    public function an_authenticated_user_can_delete_his_own_single_post()
+    {
+
     }
 }

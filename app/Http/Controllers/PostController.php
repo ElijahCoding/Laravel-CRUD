@@ -36,7 +36,17 @@ class PostController extends Controller
 
     public function update(Post $post)
     {
-        //
+        $this->authorize('touch', $post);
+
+        $data = request()->validate([
+            'body' => 'required'
+        ]);
+
+        $post->update([
+            'body' => $data['body']
+        ]);
+
+        return new PostResource($post->fresh());
     }
 
     public function destroy(Post $post)
