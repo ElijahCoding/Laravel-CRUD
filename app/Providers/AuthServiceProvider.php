@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Image;
 use App\Models\Post;
+use App\Policies\ImagePolicy;
 use App\Policies\PostPolicy;
 use Laravel\Passport\Passport;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -16,7 +18,8 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
-         Post::class => PostPolicy::class,
+        Post::class => PostPolicy::class,
+        Image::class => ImagePolicy::class,
     ];
 
     /**

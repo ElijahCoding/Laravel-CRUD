@@ -82,4 +82,31 @@ class ImageTest extends TestCase
                 ]
             ]);
     }
+
+    /** @test */
+    public function an_authenticated_user_can_retrieve_his_own_single_image()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->actingAs($user = factory(User::class)->create(), 'api');
+
+        $image = factory(Image::class)->create(['user_id' => $user->id]);
+
+        $response = $this->get('/api/images/' . $image->id);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'data' => [
+                    'type' => 'images',
+                    'image_id' => $image->id,
+                    'attributes' => [
+                        'body' => $image->body,
+                        'created_at' => $image->created_at->diffForHumans()
+                    ]
+                ],
+                'links' => [
+                    'self' => url('/images/' . $image->id),
+                ]
+            ]);
+    }
 }
