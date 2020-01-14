@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
-use App\Http\Resources\LikeCollection;
+use App\Http\Resources\Post as PostResource;
 
 class PostLikeController extends Controller
 {
     public function store(Post $post)
     {
-        $post->likes()->toggle(auth()->user());
+        $post = $post->like();
 
-        return new LikeCollection($post->likes);
+        return new PostResource($post);
     }
 }

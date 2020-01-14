@@ -48,8 +48,8 @@ class User extends Authenticatable
         return $this->hasMany(Image::class);
     }
 
-    public function likedPosts()
+    public function likes()
     {
-        return $this->belongsToMany(Post::class, 'likes', 'user_id', 'post_id');
+        return $this->hasMany(Likeable::class);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Http\Resources\LikeCollection;
+use App\Http\Resources\User as UserResource;
 use App\Models\Post;
 use App\Models\User;
 use Tests\TestCase;
@@ -15,69 +17,25 @@ class LikeTest extends TestCase
 
         $this->actingAs($user = factory(User::class)->create(), 'api');
 
-        $post = factory(Post::class)->create(['id' => 123]);
+        $post = factory(Post::class)->create();
 
         $response = $this->post('/api/posts/' . $post->id . '/like')
             ->assertStatus(200);
 
-        $this->assertCount(1, $user->likedPosts);
+        $this->assertCount(1, $user->likes);
 
         $response->assertJson([
             'data' => [
-                [
-                    'data' => [
-                        'type' => 'likes',
-                        'like_id' => 1,
-                        'attributes' => []
-                    ],
-                    'links' => [
-                        'self' => url('/posts/123'),
-                    ]
+                'type' => 'posts',
+                'post_id' => $post->id,
+                'attributes' => [
+                    'body' => $post->body,
+                    'posted_at' => $post->created_at->diffForHumans()
                 ]
             ],
             'links' => [
-                'self' => url('/posts')
+                'self' => url('/posts/' . $post->id)
             ]
         ]);
-    }
-
-    /** @test */
-    public function posts_are_returned_with_likes()
-    {
-        $this->withoutExceptionHandling();
-
-        $this->actingAs($user = factory(User::class)->create(), 'api');
-
-        $post = factory(Post::class)->create(['id' => '123', 'user_id' => $user->id]);
-
-        $this->post('/api/posts/' . $post->id . '/like')
-            ->assertStatus(200);
-
-        $response = $this->get('/api/posts')
-            ->assertStatus(200)
-            ->assertJson([
-                'data' => [
-                    [
-                        'data' => [
-                            'type' => 'posts',
-                            'attributes' => [
-                                'likes' => [
-                                    'data' => [
-                                        [
-                                            'data' => [
-                                                'type' => 'likes',
-                                                'like_id' => 1,
-                                                'attributes' => []
-                                            ]
-                                        ]
-                                    ],
-                                    'like_count' => 1,
-                                    'user_likes_post' => true,
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]);
     }
 }

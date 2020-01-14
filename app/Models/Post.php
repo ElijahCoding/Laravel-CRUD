@@ -16,7 +16,6 @@ class Post extends Model
         static::addGlobalScope(new ReverseScope());
     }
 
-
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -24,6 +23,26 @@ class Post extends Model
 
     public function likes()
     {
-        return $this->belongsToMany(User::class, 'likes', 'post_id', 'user_id');
+        return $this->morphMany(Likeable::class, 'likeable');
+    }
+
+    public function like()
+    {
+        $attributes = ['user_id' => auth()->id()];
+
+        if (!$this->likes()->where($attributes)->exists()) {
+            $this->likes()->create(
+                $attributes
+            );
+
+            return $this;
+        }
+    }
+
+    public function unlike()
+    {
+        $attributes = ['user_id' => auth()->id()];
+
+        $this->likes()->where($attributes)->get()->each->delete();
     }
 }
